@@ -1,4 +1,5 @@
 
+
 class DisjointSet():
     _id = 0
     
@@ -21,13 +22,12 @@ class DisjointSet():
         # if not, then perform this same check on its parent, this will recurse until a parent is found
         else:
             return self.parent.Find()
-​
+
     def Union(self,newParent):
         
         # change the parent of this disjoint set to newParent
         self.parent = newParent
     
-​
 class Graph():
     
     def __init__(self, V):
@@ -52,14 +52,14 @@ class Graph():
             # overwrite the verts with their corresponding disjoint set
             u = disjoints[u_index]
             v = disjoints[v_index]
-​
+
             # if the disjoint sets share a parent, then a cycle is found
             if u.parent.Find() == v.parent.Find():
                 return True
             
             # if they do not share a parent, Union them, now they do share a parent, if they are ever called upon again
             else:
-                v.Union(u)
+                u.Union(v)
                 
         # if all of the edges are iterated, and no cycles are found, return false
         return False
@@ -81,7 +81,7 @@ class Graph():
             # if adding the edge produces a cycle, them remove the edge
             if MST.UnionFind():
                 MST -= e
-​
+
         # once all edges are removed, return the clone, it is the Minimum Spanning Tree of this graph
         return MST
     
@@ -90,15 +90,20 @@ class Graph():
         
         
             
-    def __add__(self, b):
+    def __add__(self, operand):
+        
+        # if the operand is a list, iterate through each entry of that list 
+        if type(operand) == type(list()):
+            for o in operand:
+                self.__add__(o)
         
         # if the operand b is a string, treat it as a vertex, and add it directly to self.verts
-        if type(b) == type(str()):
-            self.verts += [b]
+        elif type(operand) == type(str()):
+            self.verts += [operand]
             
         # if the operand b is a tuple, treat it as an edge and add it directly to self.edges
-        elif type(b) == type(tuple()):
-            self.edges += [(b[0],b[1],b[2])]
+        elif type(operand) == type(tuple()):
+            self.edges += [(operand[0],operand[1],operand[2])]
             
         # this is here just to complete all cases for the elif statement
         else:
@@ -107,15 +112,20 @@ class Graph():
         return self
         
         
-    def __sub__(self, b):
+    def __sub__(self, operand):
         
-        # if the operand b is a string, treat it as a vertex, and remove it directly from self.verts
-        if type(b) == type(str()):
-            self.verts -= [b]
+        # if the operand is a list, iterate through each entry of that list 
+        if type(operand) == type(list()):
+            for o in operand:
+                self.__add__(o)
+        
+        # if the operand is a string, treat it as a vertex, and remove it directly from self.verts
+        elif type(operand) == type(str()):
+            self.verts -= [operand]
             
-        # if the operand b is a tuple, treat it as an edge and remove it directly from self.edges
-        elif type(b) == type(tuple()):
-            self.edges.remove((b[0],b[1],b[2]))
+        # if the operand is a tuple, treat it as an edge and remove it directly from self.edges
+        elif type(operand) == type(tuple()):
+            self.edges.remove((operand[0],operand[1],operand[2]))
             
         # this is here just to complete all cases for the elif statement
         else: 
@@ -136,11 +146,11 @@ class Graph():
         E = list()
         
         # for each edge in this graph, find the corresponding weight from the reorganized weights
-        for e in self.edges:
-            for w in W:
+        for w in W:
+            for e in self.edges:
                 
                 # match the position of the edge e, with the position of its corresponding weight
-                if e[2] == w:
+                if e not in E and e[2] == w:
                     E += [e]
                     break
                     
@@ -212,21 +222,10 @@ class Graph():
 def main():
     verts = ["a","b","c","d","e","f","g","h","i"]
     G = Graph(verts)
-    G += ("a","b",3)
-    G += ("a","d",12)
-    
-    G += ("b","c",7)
-    G += ("c","e",8)
-    G += ("d","e",10)
-    
-    G += ("e","f",9)
-    G += ("e","h",12)
-    G += ("f","g",10)
-    G += ("h","i",3)
-    
+    G += [("a","b",3),("a","d",12),("b","c",7),("c","e",8),("d","e",10),("e","f",9),("e","h",12),("f","g",10),("h","i",3)]
+
     print(G.Kruskal().edges)
+ 
+if __name__ == "__main__":
+    main()
     
-main()
-    
-​
-​
