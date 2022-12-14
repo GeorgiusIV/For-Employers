@@ -1,5 +1,5 @@
 import unittest
-import Kruskal For MST as krsk
+import KruskalForMST as krsk
 
 class method_testing(unittest.TestCase):
     
