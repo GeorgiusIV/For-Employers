@@ -1,10 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from KruskalExceptions import *
+
 
 class DisjointSet:
 
     _id = 0
+
+
 
     def __init__(self, face=None):
 
@@ -20,6 +24,8 @@ class DisjointSet:
         else:
             self.face = 'x' + str(self._id)
 
+
+
     def find(self):
 
         # if this disjoint set is its own parent, return it
@@ -32,6 +38,8 @@ class DisjointSet:
 
             return self.parent.find()
 
+
+
     def union(self, newParent):
 
         # change the parent of this disjoint set to newParent
@@ -39,12 +47,18 @@ class DisjointSet:
         self.parent = newParent
 
 
+
 class Graph:
 
-    def __init__(self, V):
+
+
+    def __init__(self, V = list(), E = list()):
 
         self.verts = V
         self.edges = list()
+        self.edges += E
+
+
 
     def union_find(self):
 
@@ -69,7 +83,7 @@ class Graph:
 
             # if the disjoint sets share a parent, then a cycle is found
 
-            if u.parent.Find() == v.parent.find():
+            if u.parent.find() == v.parent.find():
                 return True
             else:
 
@@ -80,6 +94,8 @@ class Graph:
         # if all edges are iterated, and no cycles are found, return false
         
         return False
+
+
 
     def kruskal(self):
 
@@ -105,30 +121,135 @@ class Graph:
 
         return MST
 
+
+
     def __add__(self, operand):
+
+        def try_change_type(i, o, f):
+
+            try:
+                # this may deviate from what the user expects to happen, so I am printing it too
+
+                print("Attempting to change value:", o, "to type:", type(f), "from:", type(o))
+                o = type(f)(o)
+
+
+            except TypeError:
+                raise SpecificTypeError(i, currentIs = type(o), shouldBe = type(f))
+
+            except ValueError:
+                raise SpecificTypeError(i, currentIs = type(o), shouldBe = type(f))
+
+            return o
 
         # if operand is list, iterate through each entry of the list
 
         if type(operand) == type(list()):
             for o in operand:
                 self.__add__(o)
-        elif type(operand) == type(str()):
 
-        # if operand is string, treat it as vertex - add directly to self.verts
 
-            self.verts += [operand]
+
+        # check if operand is tuple
+
         elif type(operand) == type(tuple()):
 
-        # if operand is tuple, treat it as edge - add directly to self.edges
 
-            self.edges += [(operand[0], operand[1], operand[2])]
+
+            # check if the tuple is of the correct length
+
+            try:
+                if len(operand) != 3:
+                    raise LengthError
+
+            except LengthError:
+                return self
+
+
+
+            # check that no verts are repeated in the tuple
+
+            try: 
+                for o in operand:
+                    if operand.count(o) > 1:
+                        raise SharedVertexError
+
+            except SharedVertexError:
+                return self
+
+
+
+            # check if the tuple is of the correct form
+
+            try:
+                form = [str(), str(), int()]
+                for i,o in enumerate(operand):
+                    
+                    #if i > 2: 
+                    #    break 
+                    
+                    f = form.pop(0)
+
+                    # check the type matches the form's type at each index
+
+                    if type(o) != type(f):
+                    
+                        # if not, try to convert the current type to the correct type (either int or string)
+
+                        operand[i] = try_change_type(i, o, f)
+
+            except SpecificTypeError:
+                return self
+
+
+
+            # check if the edge is already contained in the list
+
+            try:
+                for e in self.edges:
+                    if (operand[0],operand[1]) == (e[0],e[1]):
+                        raise RepetitionError
+
+            except RepetitionError:
+                return self
+
+
+
+            # finally, if the tuple is the correct form, add the edge
+
+            self.edges.append((operand[0], operand[1], operand[2]))
+
+
+
+        # if the operand is not a list or a tuple -
+
         else:
+            valid_vert = True
 
-        # complete all cases for the if-elif-else statement
+            # - attempt to convert it to a string
+            try:
+                try_change_type(operand, type(str()))
 
-            pass
+            except SpecificTypeError:
+                return self
+
+            # check if the vert is already in self.verts
+
+            try:
+                if operand in self.verts:
+                    raise RepetitionError
+
+            except RepetitionError:
+                return self
+
+            # finally, add the vert to the Graph
+
+            if valid_vert:
+                self.verts += operand
 
         return self
+
+
 
     def __sub__(self, operand):
 
@@ -136,29 +257,46 @@ class Graph:
 
         if type(operand) == type(list()):
             for o in operand:
-                self.__add__(o)
-        elif type(operand) == type(str()):
+                self.__sub__(o)
 
         # if operand is string, treat it as vertex - remove from self.verts
 
-            self.verts -= [operand]
-        elif type(operand) == type(tuple()):
+        elif type(operand) == type(str()):
+
+            try:
+                if operand in self.verts:
+                    self.verts -= [operand]
+                else:
+                    raise NotInGraph
+
+            except NotInGraph:
+                pass
 
         # if operand is tuple, treat it as edge - remove from self.edges
 
-            self.edges.remove((operand[0], operand[1], operand[2]))
-        else:
+        elif type(operand) == type(tuple()):
+
+            try:
+                if operand in self.edges:
+                    self.edges.remove((operand[0], operand[1], operand[2]))
+                else:
+                    raise NotInGraph
+
+            except NotInGraph:
+                pass
 
         # complete all cases for the if-elif-else statement
 
+        else:
             pass
 
         return self
 
+
+
     def reorder_edges(self):
 
-        # create a list of the weights of this graph
-
+        # create a list of the weights of this graph, if the graph is not empty
         W = [e[2] for e in self.edges]
 
         # sort the weights in ascending order
@@ -183,6 +321,8 @@ class Graph:
         # return the reorganized edges
 
         return E
+
+
 
     def merge_sort(self, lst):
 
@@ -271,6 +411,7 @@ class Graph:
 
 
 def main():
+    '''
     verts = [
         'a',
         'b',
@@ -293,9 +434,11 @@ def main():
         ('e', 'h', 12),
         ('f', 'g', 10),
         ('h', 'i', 3),
-        ]
+        ]'''
+    G = Graph(["a","b"])
+    G += [("a","b","c"),("a","b","c")]
 
-    print G.kruskal().edges
+    print(G.kruskal().edges)
 
 
 if __name__ == '__main__':
