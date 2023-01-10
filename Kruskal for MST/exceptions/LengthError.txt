@@ -1,0 +1,4 @@
+class LengthError(Exception):
+    def __init__(self):
+        self.message = "The length of the tuple should be no greater or less than 3."
+        super().__init__(self.message)

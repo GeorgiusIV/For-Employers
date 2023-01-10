@@ -1,0 +1,4 @@
+class NotInGraph(Exception):
+    def __init__(self):
+        self.message = "The deleted Edge or Vertex is not present on the Graph."
+        super().__init__(self.message)

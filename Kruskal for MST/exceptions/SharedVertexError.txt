@@ -1,0 +1,4 @@
+class SharedVertexError(Exception):
+    def __init__(self):
+        self.message = "On an edge, both verts are identical."
+        super().__init__(self.message)

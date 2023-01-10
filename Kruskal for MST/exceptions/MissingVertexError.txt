@@ -1,0 +1,4 @@
+class MissingVertexError(Exception):
+    def __init__(self):
+        self.message = "For an edge, the required vertex is missing on the Graph."
+        super().__init__(self.message)

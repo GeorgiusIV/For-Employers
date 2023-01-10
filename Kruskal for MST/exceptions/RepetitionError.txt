@@ -1,0 +1,4 @@
+class RepetitionError(Exception):
+    def __init__(self):
+        self.message = "The same edge or vertex has been input twice."
+        super().__init__(self.message)

@@ -1,0 +1,4 @@
+class SpecificTypeError(Exception):
+    def __init__(self, index, currentIs = None, shouldBe = None):
+        self.message = "Index: " + str(index) + " should be type: " + str(currentIs) + " but is: " + str(shouldBe)
+        super().__init__(self.message)
